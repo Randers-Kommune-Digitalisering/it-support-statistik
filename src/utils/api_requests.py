@@ -4,10 +4,9 @@ import logging
 
 
 class APIClient:
-    def __init__(self, base_url, api_key=None, realm=None, client_id=None, client_secret=None, username=None, password=None, cert_base64=None):
+    def __init__(self, base_url, api_key=None, client_id=None, client_secret=None, username=None, password=None, cert_base64=None):
         self.base_url = base_url
         self.api_key = api_key
-        self.realm = realm
         self.client_id = client_id
         self.client_secret = client_secret
         self.username = username
@@ -28,8 +27,6 @@ class APIClient:
         if self.api_key:
             return {'Authorization': f'Bearer {self.api_key}'}
         elif self.client_id and self.client_secret:
-            if not self.realm:
-                raise ValueError('Realm is required for client_id and client_secret authentication')
 
             refresh_token = False
 
@@ -43,7 +40,7 @@ class APIClient:
                                 if time.time() < self.refresh_token_expiry:
                                     refresh_token = True
 
-            tmp_url = f'{self.base_url}/auth/realms/{self.realm}/protocol/openid-connect/token'
+            tmp_url = f'{self.base_url}/auth/connect/token'
 
             tmp_headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'

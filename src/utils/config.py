@@ -10,8 +10,6 @@ DEBUG = os.getenv('DEBUG', 'False') in ['True', 'true']
 PORT = os.getenv('PORT', '8080')
 POD_NAME = os.getenv('POD_NAME', 'pod_name_not_set')
 
-# DB_USER = os.environ["DB_USER"].strip()
-# DB_PASS = os.environ["DB_PASS"].strip()
-# DB_HOST = os.environ["DB_HOST"].strip()
-# DB_PORT = os.environ["DB_PORT"].strip()
-# DB_DATABASE = os.environ["DB_DATABASE"].strip()
+ZYLINC_URL = os.environ["ZYLINC_URL"].strip()
+ZYLINC_CLIENT = os.environ["ZYLINC_CLIENT"].strip()
+ZYLINC_SECRET = os.environ["ZYLINC_SECRET"].strip()
