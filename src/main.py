@@ -46,16 +46,18 @@ if keycloak.authenticated:
                 incoming_calls = updated_calls_df[updated_calls_df['direction'] == 'Incoming'].copy()
                 incoming_calls = set_df_time_style(incoming_calls)
             else:
-                incoming_calls = old_calls_df[old_calls_df['direction'] == 'Incoming'].copy()
-                incoming_calls = set_df_time_style(incoming_calls)
+                if not old_calls_df.empty:
+                    incoming_calls = old_calls_df[old_calls_df['direction'] == 'Incoming'].copy()
+                    incoming_calls = set_df_time_style(incoming_calls)
 
             placeholder.empty()
             with placeholder.container():
-                st.write("Incoming calls")
-                st.write(style_dataframe(incoming_calls[['start', 'state', 'agent_name', 'wait_time', 'duration']].style.apply(highlight_state, axis=1), 'lightblue').to_html(), unsafe_allow_html=True)
+                if not incoming_calls.empty:
+                    st.write("Incoming calls")
+                    st.write(style_dataframe(incoming_calls[['start', 'state', 'agent_name', 'wait_time', 'duration']].style.apply(highlight_state, axis=1), 'lightblue').to_html(), unsafe_allow_html=True)
 
-                st.write("Ended calls")
                 if not ended_calls_df.empty:
+                    st.write("Ended calls")
                     tmp_df = ended_calls_df.head(10).copy()
                     tmp_df = set_df_time_style(tmp_df)
                     tmp_df['state'] = tmp_df.apply(lambda row: 'Missed' if row['state'] not in ['Connected', 'Transferred'] else row['state'], axis=1)
