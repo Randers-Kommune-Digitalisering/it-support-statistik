@@ -49,6 +49,8 @@ if keycloak.authenticated:
                 if not old_calls_df.empty:
                     incoming_calls = old_calls_df[old_calls_df['direction'] == 'Incoming'].copy()
                     incoming_calls = set_df_time_style(incoming_calls)
+                else:
+                    incoming_calls = pd.DataFrame()
 
             placeholder.empty()
             with placeholder.container():
