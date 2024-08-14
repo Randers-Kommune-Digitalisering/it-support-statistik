@@ -1,3 +1,4 @@
+import pytest
 import base64
 
 from unittest.mock import MagicMock, patch
@@ -22,7 +23,7 @@ def test_authenticate_api_key():
 @patch('time.time')
 @patch('requests.post')
 def test_authenticate_client_credentials(mock_post, mock_time):
-    api_client = APIClient('http://testurl.com/test_realm', client_id='test_id', client_secret='test_secret')
+    api_client = APIClient('http://testurl.com', client_id='test_id', client_secret='test_secret', realm='test_realm')
 
     mock_time.return_value = 0
 
@@ -43,7 +44,7 @@ def test_authenticate_client_credentials(mock_post, mock_time):
 @patch('time.time')
 @patch('requests.post')
 def test_authenticate_user_password(mock_post, mock_time):
-    api_client = APIClient('http://testurl.com/test_realm', client_id='test_id', client_secret='test_secret', username='test_user', password='test_pass')
+    api_client = APIClient('http://testurl.com', client_id='test_id', client_secret='test_secret', realm='test_realm', username='test_user', password='test_pass')
 
     mock_time.return_value = 0
 
@@ -69,7 +70,7 @@ def test_authenticate_cert():
 @patch('time.time')
 @patch('requests.post')
 def test_authenticate_refresh_token(mock_post, mock_time):
-    api_client = APIClient('http://testurl.com/test_realm', client_id='test_id', client_secret='test_secret')
+    api_client = APIClient('http://testurl.com', client_id='test_id', client_secret='test_secret', realm='test_realm')
     api_client.access_token = 'test_token'
     api_client.token_expiry = 10
     api_client.refresh_token = 'test_refresh_token'
@@ -88,6 +89,13 @@ def test_authenticate_refresh_token(mock_post, mock_time):
     assert api_client.refresh_token_expiry == 35  # time now is 15
     assert api_client.refresh_token == 'test_refresh_token'
 
+
+def test_authenticate_no_realm():
+    with pytest.raises(ValueError) as excinfo:
+        api_client = APIClient('http://testurl.com', client_id='test_id', client_secret='test_secret', realm='test_realm')
+        api_client.realm = None
+        api_client._authenticate()
+    assert 'Realm is required for client_id and client_secret authentication' in str(excinfo.value)
 
 # make_request tests
 

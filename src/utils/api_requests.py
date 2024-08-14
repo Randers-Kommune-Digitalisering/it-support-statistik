@@ -4,9 +4,10 @@ import logging
 
 
 class APIClient:
-    def __init__(self, base_url, api_key=None, client_id=None, client_secret=None, username=None, password=None, cert_base64=None):
+    def __init__(self, base_url, api_key=None, realm=None, client_id=None, client_secret=None, username=None, password=None, cert_base64=None):
         self.base_url = base_url
         self.api_key = api_key
+        self.realm = realm
         self.client_id = client_id
         self.client_secret = client_secret
         self.username = username
@@ -27,6 +28,8 @@ class APIClient:
         if self.api_key:
             return {'Authorization': f'Bearer {self.api_key}'}
         elif self.client_id and self.client_secret:
+            if not self.realm:
+                raise ValueError('Realm is required for client_id and client_secret authentication')
 
             refresh_token = False
 
@@ -40,7 +43,7 @@ class APIClient:
                                 if time.time() < self.refresh_token_expiry:
                                     refresh_token = True
 
-            tmp_url = f'{self.base_url}/auth/connect/token'
+            tmp_url = f'{self.base_url}/{self.realm}/auth/connect/token'
 
             tmp_headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -92,9 +95,15 @@ class APIClient:
             if 'path' in kwargs:
                 if not isinstance(kwargs['path'], str):
                     raise ValueError('Path must be a string')
-                url = self.base_url.rstrip('/') + '/' + kwargs.pop('path').lstrip('/')
+                if self.realm:
+                    url = self.base_url.rstrip('/') + f'/{self.realm}/' + kwargs.pop('path').lstrip('/')
+                else:
+                    url = self.base_url.rstrip('/') + '/' + kwargs.pop('path').lstrip('/')
             else:
-                url = self.base_url
+                if self.realm:
+                    url = self.base_url.rstrip('/') + f'/{self.realm}'
+                else:
+                    url = self.base_url
 
             if 'headers' in kwargs:
                 if not isinstance(kwargs['headers'], dict):
@@ -119,7 +128,7 @@ class APIClient:
             response = method(url, **kwargs)
             response.raise_for_status()
 
-            self.logger.info(f'{method_string} request to {url} successful')
+            # self.logger.info(f'{method_string} request to {url} successful')
 
             if 'application/json' in response.headers.get('Content-Type', ''):
                 return response.json()
